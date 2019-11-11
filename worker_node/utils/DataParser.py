@@ -60,10 +60,12 @@ class GPXDataParser():
 
 
     def extract_segment_data(self, segment):
-        data = {'ele': [], 'time': [], 'power': []}
+        data = {'ele': [], 'time': [], 'power': [], 'coords': []}
         child_data = ['ele', 'time']
         extension_data = ['power']
         for point in segment:
+            lat, lon = float(point.attrib['lat']), float(point.attrib['lon'])
+            data['coords'].append([lat, lon])
             for child in child_data:
                 feature = point.find('gpx:{}'.format(child), self.namespace)
                 if feature is not None:

@@ -1,5 +1,6 @@
 import numpy as np
 import matplotlib.pyplot as plt
+from geopy.distance import distance as geodistance
 
 class DataAnalyzer():
     def __init__(self):
@@ -66,6 +67,17 @@ class DataAnalyzer():
         for i in range(len(time_data)-1):
             accumulated_power += (power_data[i] * (time_data[i+1] - time_data[i]))
         return accumulated_power / float(self.get_elapsed_time(time_data))
+
+
+    def get_distance(self, coords):
+        valid_indices = self.get_valid_indices(np.array(coords[:,0]).astype(float), np.array(coords[:,1]).astype(float))
+        coords = coords[valid_indices]
+
+        dist = 0
+        for i in range(len(coords)-1):
+            dist += geodistance(coords[i], coords[i+1]).km
+
+        return dist
 
 
     def get_elapsed_time(self, time_data):

@@ -45,6 +45,20 @@ class GPXDataParser():
         return times
 
 
+    def cast_data_as_numeric(self, data_dict):
+        for data_key in data_dict.keys():
+            data_dict[data_key] = np.array(data_dict[data_key])
+            if data_key == 'time':
+                continue
+            else:
+                try:
+                    data_dict[data_key] = data_dict[data_key].astype(float)
+                except ValueError:
+                    continue
+
+        return data_dict
+
+
     def extract_segment_data(self, segment):
         data = {'ele': [], 'time': [], 'power': []}
         child_data = ['ele', 'time']
@@ -73,6 +87,7 @@ class GPXDataParser():
                     data[extended_feature].append(None)
 
         data['time'] = self.format_time_data(data['time'])
+        data = self.cast_data_as_numeric(data)
 
         return data
 

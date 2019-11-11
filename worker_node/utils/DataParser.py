@@ -1,6 +1,7 @@
 import xml.etree.ElementTree as ET
 import re
 import numpy as np
+from time import strptime
 
 class GPXDataParser():
     def __init__(self, xml_str):
@@ -33,6 +34,17 @@ class GPXDataParser():
         return segments
 
 
+    def format_time_data(self, time_data):
+        times = []
+        for ts in time_data:
+            try:
+                t = strptime(ts, '%Y-%m-%dT%H:%M:%SZ')
+                times.append(float(t.tm_hour)*3600 + float(t.tm_min)*60 + float(t.tm_sec))
+            except (TypeError, ValueError):
+                times.append(None)
+        return times
+
+
     def extract_segment_data(self, segment):
         data = {'ele': [], 'time': [], 'power': []}
         child_data = ['ele', 'time']
@@ -45,6 +57,8 @@ class GPXDataParser():
                         data[child].append(feature.text)
                     except AttributeError:
                         data[child].append(None)
+                else:
+                    data[child].append(None)
 
             extensions = point.find('gpx:extensions', self.namespace)
             if extensions is not None:
@@ -54,6 +68,11 @@ class GPXDataParser():
                         data[extended_feature].append(feature.text)
                     except AttributeError:
                         data[extended_feature].append(None)
+            else:
+                for extended_feature in extension_data:
+                    data[extended_feature].append(None)
+
+        data['time'] = self.format_time_data(data['time'])
 
         return data
 

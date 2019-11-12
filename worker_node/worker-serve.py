@@ -6,7 +6,7 @@ import pickle
 import socket
 from utils.DataParser import GPXDataParser
 from utils.DataAnalyzer import DataAnalyzer
-from utils.Datastore_utils import add_ride, get_ride_data, get_aggregate_statistics
+from utils.Datastore import add_ride, get_ride_data, get_aggregate_statistics
 
 def generate_visualizations(analyer, data):
     pass

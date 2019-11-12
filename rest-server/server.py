@@ -8,7 +8,7 @@ import pika
 import pickle
 import socket
 import sys
-from utils.Datastore_utils import get_aggregate_statistics, get_ride_data
+from utils.Datastore import get_aggregate_statistics, get_ride_data
 
 # Initialize the Flask application
 app = Flask(__name__)

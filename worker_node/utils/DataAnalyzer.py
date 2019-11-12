@@ -109,7 +109,7 @@ class DataAnalyzer():
             if diff >= 0:
                 climb += diff
             else:
-                descend += diff
+                descend -= diff
             current_elev = elev
         return min_elev, max_elev, climb, descend
 

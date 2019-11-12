@@ -5,14 +5,36 @@ import io
 import pickle
 import socket
 from utils.DataParser import GPXDataParser
+from utils.DataAnalyzer import DataAnalyzer
+from utils.Datastore_utils import add_ride, get_ride_data, get_aggregate_statistics
 
+def generate_visualizations(analyer, data):
+    pass
 
+def get_summary_statistics(analyzer, data):
+    duration = analyzer.get_elapsed_time(data['time'])
+    distance = analyzer.get_distance(data['coords'])
+    _, _, climb, descend = analyzer.get_elevation_statistics(data['ele'])
+    return duration, distance, climb, descend
 
 def callback(ch, method, properties, body):
-    md5, filename, file_data = pickle.loads(body)
+    digest, filename, file_data = pickle.loads(body)
     dataparser = GPXDataParser(file_data.decode('utf-8'))
-    data_dict = dataparser.get_ride_data()
-    print(data_dict)
+    segments_data = dataparser.get_ride_data()
+    analyzer = DataAnalyzer()
+    for i, data in enumerate(segments_data):
+        duration, distance, climb, descend = get_summary_statistics(analyzer, data)
+        generate_visualizations(analyzer, data)
+
+        try:
+            add_ride(digest, i, duration, distance, climb, descend)
+        except BaseException as e:
+            print('Failed to update DB - {}'.format(e))
+
+    print('results')
+    print(get_aggregate_statistics())
+    print()
+
     ch.basic_ack(delivery_tag=method.delivery_tag)
 
 

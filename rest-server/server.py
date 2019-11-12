@@ -8,6 +8,7 @@ import pika
 import pickle
 import socket
 import sys
+from utils.Datastore_utils import get_aggregate_statistics, get_ride_data
 
 # Initialize the Flask application
 app = Flask(__name__)
@@ -56,7 +57,7 @@ def test():
     return "Testing..."
 
 
-@app.route('/upload_ride/<filename>', methods=['PUT'])
+@app.route('/upload-ride/<filename>', methods=['PUT'])
 def process_data(filename):
     r = request
     try:
@@ -65,14 +66,44 @@ def process_data(filename):
         publish_work_request(data, host='localhost')
         response = {'md5 hash' : hash}
         status=200
-    except:
-        e = sys.exc_info()[0]
-        print(e)
+    except BaseException as e:
+        print('Error: upload-ride - {}'.format(e))
         response = { 'md5 hash' : 'None'}
         status=400
 
-    response_pickled = jsonpickle.encode(response)
-    return Response(response=response_pickled, status=status, mimetype="application/json")
+    return Response(response=jsonpickle.encode(response), status=status, mimetype="application/json")
+
+
+@app.route('/global-stats', methods=['GET'])
+def get_global_statistics():
+    try:
+        data = get_aggregate_statistics()
+        status = 200
+    except BaseException as e:
+        print('Error: global-stats - {}'.format(e))
+        data = {}
+        status = 400
+
+    return Response(response=jsonpickle.encode(data), status=status, mimetype="application/json")
+
+
+@app.route('/ride-data/<digest>', methods=['GET'])
+def get_data_for_ride(digest):
+    try:
+        data = get_ride_data(digest)
+        status = 200
+    except BaseException as e:
+        print('Error: ride-data - {}'.format(e))
+        data = []
+        status = 400
+
+    response = {'segments': data}
+    return Response(response=jsonpickle.encode(data), status=status, mimetype="application/json")
+
+
+@app.route('/visualize', methods=['GET'])
+def get_ride_visualizations():
+    return 'TODO...'
 
 
 if __name__ == '__main__':

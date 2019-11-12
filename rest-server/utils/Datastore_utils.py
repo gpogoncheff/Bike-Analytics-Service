@@ -8,19 +8,6 @@ def get_client():
         client = datastore.Client()
     return client
 
-def add_ride(digest, segment, duration, distance, climb, descend):
-    client = get_client()
-    ride_entity = datastore.Entity(key=client.key('Ride', '{}_{}'.format(digest, segment)))
-    ride_entity.update({
-        'digest': digest,
-        'segment': segment,
-        'duration': duration,
-        'distance': distance,
-        'climb': climb,
-        'descend': descend,
-    })
-    client.put(ride_entity)
-
 def get_ride_data(digest):
     client = get_client()
     query = client.query(kind='Ride')

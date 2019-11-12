@@ -31,9 +31,9 @@ def callback(ch, method, properties, body):
         except BaseException as e:
             print('Failed to update DB - {}'.format(e))
 
-    print('results')
-    print(get_aggregate_statistics())
-    print()
+    #print('results')
+    #print(get_aggregate_statistics())
+    #print()
 
     ch.basic_ack(delivery_tag=method.delivery_tag)
 

@@ -12,7 +12,7 @@ def submit_datafile(address, file_dest):
 
     # send http request with image and receive response
     filename = str(file_dest).split('/')[-1]
-    submit_url = addr + '/upload_ride/{}'.format(filename)
+    submit_url = addr + '/upload-ride/{}'.format(filename)
     response = requests.put(submit_url, data=data, headers=headers)
 
     # decode response

@@ -6,10 +6,15 @@ import pickle
 import socket
 from utils.DataParser import GPXDataParser
 from utils.DataAnalyzer import DataAnalyzer
-from utils.Datastore import add_ride, get_ride_data, get_aggregate_statistics
+import utils.Datastore as datastore
+from utils.CloudStorage import upload_visualization
 
-def generate_visualizations(analyer, data):
-    pass
+def get_visualization(analyzer, data, digest, segment):
+    # return url for the visualization
+    buff = analyzer.generate_data_visualizations(data['time'], data['power'], data['ele'])
+    url = upload_visualization(digest, segment, buff)
+    buff.close()
+    return url
 
 def get_summary_statistics(analyzer, data):
     duration = analyzer.get_elapsed_time(data['time'])
@@ -24,16 +29,13 @@ def callback(ch, method, properties, body):
     analyzer = DataAnalyzer()
     for i, data in enumerate(segments_data):
         duration, distance, climb, descend = get_summary_statistics(analyzer, data)
-        generate_visualizations(analyzer, data)
+        url = get_visualization(analyzer, data, digest, i)
+        print('Ride data visualization available at: {}'.format(url))
 
         try:
-            add_ride(digest, i, duration, distance, climb, descend)
+            datastore.add_ride(digest, i, duration, distance, climb, descend)
         except BaseException as e:
-            print('Failed to update DB - {}'.format(e))
-
-    #print('results')
-    #print(get_aggregate_statistics())
-    #print()
+            print('Failed to update Database - {}'.format(e))
 
     ch.basic_ack(delivery_tag=method.delivery_tag)
 

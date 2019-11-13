@@ -17,13 +17,15 @@ def get_bucket():
         bucket = client.lookup_bucket('data-visualizations')
     return bucket
 
-def upload_visualization(digest, segment):
-    get_bucket()
-    blob = storage.Blob('test0/item0', bucket=bucket)
-
-    with open("testimage.jpg", "rb") as imageFile:
-        str = imageFile.read()
-        ioBuffer = io.BytesIO(str)
-        blob.upload_from_file(ioBuffer, content_type='image/jpeg')
+def upload_visualization(digest, segment, ioBuff):
+    try:
+        get_bucket()
+        blob = storage.Blob('{}/{}'.format(digest, segment), bucket=bucket)
+        blob.upload_from_file(ioBuff, content_type='image/png')
         blob.make_public()
-        print(blob.public_url)
+        url = blob.public_url
+    except BaseException as e:
+        print('Failed to Generate Visualization - {}'.format(e))
+        url = ''
+
+    return url

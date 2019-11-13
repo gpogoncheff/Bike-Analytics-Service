@@ -1,4 +1,4 @@
-from flask import Flask, request, Response
+from flask import Flask, request, Response, redirect
 import jsonpickle
 import numpy as np
 from PIL import Image
@@ -9,6 +9,7 @@ import pickle
 import socket
 import sys
 from utils.Datastore import get_aggregate_statistics, get_ride_data
+from utils.CloudStorage import get_visualization_url
 
 # Initialize the Flask application
 app = Flask(__name__)
@@ -101,9 +102,10 @@ def get_data_for_ride(digest):
     return Response(response=jsonpickle.encode(response), status=status, mimetype="application/json")
 
 
-@app.route('/visualize', methods=['GET'])
-def get_ride_visualizations():
-    return 'TODO...'
+@app.route('/visualize/<digest>/<segment>', methods=['GET'])
+def get_ride_visualizations(digest, segment):
+    url = get_visualization_url(digest, segment)
+    return redirect(url, code=302)
 
 
 if __name__ == '__main__':

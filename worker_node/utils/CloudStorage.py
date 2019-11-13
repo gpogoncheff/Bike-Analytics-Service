@@ -19,7 +19,6 @@ def get_ride_file_bucket():
     bucket = client.lookup_bucket('ride-files')
     return bucket
 
-
 def upload_visualization(digest, segment, ioBuff):
     try:
         bucket = get_visualizations_bucket()

@@ -7,7 +7,7 @@ import socket
 from utils.DataParser import GPXDataParser
 from utils.DataAnalyzer import DataAnalyzer
 import utils.Datastore as datastore
-from utils.CloudStorage import upload_visualization
+from utils.CloudStorage import upload_visualization, upload_file
 
 def get_visualization(analyzer, data, digest, segment):
     # return url for the visualization
@@ -24,9 +24,11 @@ def get_summary_statistics(analyzer, data):
 
 def callback(ch, method, properties, body):
     digest, filename, file_data = pickle.loads(body)
+    upload_file(digest, file_data.decode('utf-8'))
     dataparser = GPXDataParser(file_data.decode('utf-8'))
     segments_data = dataparser.get_ride_data()
     analyzer = DataAnalyzer()
+
     for i, data in enumerate(segments_data):
         duration, distance, climb, descend = get_summary_statistics(analyzer, data)
         url = get_visualization(analyzer, data, digest, i)

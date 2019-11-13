@@ -98,7 +98,7 @@ def get_data_for_ride(digest):
         status = 400
 
     response = {'segments': data}
-    return Response(response=jsonpickle.encode(data), status=status, mimetype="application/json")
+    return Response(response=jsonpickle.encode(response), status=status, mimetype="application/json")
 
 
 @app.route('/visualize', methods=['GET'])

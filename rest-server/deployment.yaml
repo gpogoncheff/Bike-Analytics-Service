@@ -1,0 +1,33 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: rest-server-deployment
+  labels:
+    app: rest-server
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: rest-server
+      version: 0.0.0
+  template:
+    metadata:
+      labels:
+        app: rest-server
+        version: 0.0.0
+    spec:
+      volumes:
+      - name: google-cloud-key
+        secret:
+          secretName: proj-access-key
+      containers:
+      - name: rest-server
+        image: gcr.io/project-5253/rest-server:v03
+        ports:
+        - containerPort: 5000
+        volumeMounts:
+        - name: google-cloud-key
+          mountPath: /var/secrets/google
+        env:
+        - name: GOOGLE_APPLICATION_CREDENTIALS
+          value: /var/secrets/google/key.json

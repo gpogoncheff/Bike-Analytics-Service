@@ -14,13 +14,14 @@ from utils.CloudStorage import get_visualization_url
 
 # Initialize the Flask application
 app = Flask(__name__)
+mq_host = 'localhost'
 
 
-def publish_work_request(data, host='rabbitmq', queue_name='work_route'):
+def publish_work_request(data, queue_name='work_route'):
     success = False
     connection = None
     try:
-        connection = pika.BlockingConnection(pika.ConnectionParameters(host=host))
+        connection = pika.BlockingConnection(pika.ConnectionParameters(host=mq_host))
         channel = connection.channel()
         channel.queue_declare(queue=queue_name, durable=True)
 
@@ -43,11 +44,11 @@ def publish_work_request(data, host='rabbitmq', queue_name='work_route'):
     return success
 
 
-def log_api_status(api, success, message='', host='rabbitmq'):
+def log_api_status(api, success, message=''):
     # log the api that was called and the result of the api call
     connection = None
     try:
-        connection = pika.BlockingConnection(pika.ConnectionParameters(host=host))
+        connection = pika.BlockingConnection(pika.ConnectionParameters(host=mq_host))
         log_channel = connection.channel()
         log_channel.exchange_declare(exchange='logs', exchange_type='topic')
 
@@ -81,7 +82,7 @@ def process_data(filename):
     try:
         hash = str(hashlib.md5(r.data).hexdigest())
         data = pickle.dumps((hash, filename, r.data))
-        work_published = publish_work_request(data, host='localhost')
+        work_published = publish_work_request(data)
         response = {'md5 hash' : hash}
         status = 200 if work_published else 500
     except BaseException as e:
@@ -97,7 +98,7 @@ def process_data(filename):
         message = 'Failed to publish to RabbitMQ'
     else:
         message = 'FAILED'
-    log_api_status('/upload-ride/{}'.format(filename), success, message, host='localhost')
+    log_api_status('/upload-ride/{}'.format(filename), success, message)
 
     return Response(response=jsonpickle.encode(response), status=status, mimetype="application/json")
 
@@ -118,7 +119,7 @@ def get_global_statistics():
         success = True
     else:
         message = 'FAILED'
-    log_api_status('/global-stats', success, message, host='localhost')
+    log_api_status('/global-stats', success, message)
 
     return Response(response=jsonpickle.encode(data), status=status, mimetype="application/json")
 
@@ -139,7 +140,7 @@ def get_data_for_ride(digest):
         success = True
     else:
         message = 'FAILED'
-    log_api_status('/ride-data/{}'.format(digest), success, message, host='localhost')
+    log_api_status('/ride-data/{}'.format(digest), success, message)
 
     response = {'segments': data}
     return Response(response=jsonpickle.encode(response), status=status, mimetype="application/json")
@@ -147,6 +148,7 @@ def get_data_for_ride(digest):
 
 @app.route('/visualize/<digest>/<segment>', methods=['GET'])
 def get_ride_visualizations(digest, segment):
+    url = ''
     try:
         url = get_visualization_url(digest, segment)
         status = 200
@@ -160,7 +162,7 @@ def get_ride_visualizations(digest, segment):
         success = True
     else:
         message = 'FAILED'
-    log_api_status('/visualize/{}/{}'.format(digest, segment), success, message, host='localhost')
+    log_api_status('/visualize/{}/{}'.format(digest, segment), success, message)
 
     return redirect(url, code=302)
 

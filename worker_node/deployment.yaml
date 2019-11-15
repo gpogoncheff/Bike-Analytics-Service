@@ -1,0 +1,32 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: worker-server
+  labels:
+    app: worker-server
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: worker-server
+      version: 0.0.0
+  template:
+    metadata:
+      labels:
+        app: worker-server
+        version: 0.0.0
+    spec:
+      volumes:
+      - name: google-cloud-key
+        secret:
+          secretName: proj-access-key
+      containers:
+      - image: gcr.io/project-5253/worker-server:v03
+        name: worker-server
+        volumeMounts:
+        - name: google-cloud-key
+          mountPath: /var/secrets/google
+        env:
+        - name: GOOGLE_APPLICATION_CREDENTIALS
+          value: /var/secrets/google/key.json
+

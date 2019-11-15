@@ -9,11 +9,12 @@ from utils.DataAnalyzer import DataAnalyzer
 import utils.Datastore as datastore
 from utils.CloudStorage import upload_visualization, upload_file
 
+mq_host = 'localhost'
 
-def log_work(work_description, success, host='rabbitmq'):
+def log_work(work_description, success):
     # log the api that was called and the result of the api call
     try:
-        log_connection = pika.BlockingConnection(pika.ConnectionParameters(host=host))
+        log_connection = pika.BlockingConnection(pika.ConnectionParameters(host=mq_host))
         log_channel = log_connection.channel()
         log_channel.exchange_declare(exchange='logs', exchange_type='topic')
 
@@ -41,9 +42,9 @@ def get_visualization(analyzer, data, digest, segment):
     url = upload_visualization(digest, segment, buff)
     buff.close()
     if url == '':
-        log_work('Failed to save visualization for {}'.format(digest), success=False, host='localhost')
+        log_work('Failed to save visualization for {}'.format(digest), success=False)
     else:
-        log_work('Saved visualization for {} at {}'.format(digest, url), success=True, host='localhost')
+        log_work('Saved visualization for {} at {}'.format(digest, url), success=True)
     return url
 
 def get_summary_statistics(analyzer, data):
@@ -66,20 +67,20 @@ def callback(ch, method, properties, body):
 
         try:
             datastore.add_ride(digest, i, duration, distance, climb, descend)
-            log_work('Added data from {} to Datastore DB'.format(digest), success=True, host='localhost')
+            log_work('Added data from {} to Datastore DB'.format(digest), success=True)
         except BaseException as e:
             print('Failed to update Database - {}'.format(e))
-            log_work('Failed to add data from {} to Datastore DB'.format(digest), success=False, host='localhost')
+            log_work('Failed to add data from {} to Datastore DB'.format(digest), success=False)
 
     upload_file(digest, file_data.decode('utf-8'))
-    log_work('Uploaded data file with digest {} to Cloud Storage'.format(digest), success=True, host='localhost')
+    log_work('Uploaded data file with digest {} to Cloud Storage'.format(digest), success=True)
 
     ch.basic_ack(delivery_tag=method.delivery_tag)
 
 
 if __name__ == '__main__':
     # Set up rabbitmq connections
-    connection = pika.BlockingConnection(pika.ConnectionParameters(host='localhost'))
+    connection = pika.BlockingConnection(pika.ConnectionParameters(host=mq_host))
     channel = connection.channel()
     channel.queue_declare(queue='work_route', durable=True)
     # Initialize logging channel

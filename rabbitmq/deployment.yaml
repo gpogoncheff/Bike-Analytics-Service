@@ -1,0 +1,23 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: rabbitmq
+  labels:
+    app: rabbitmq
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: rabbitmq
+      version: 0.0.0
+  template:
+    metadata:
+      labels:
+        app: rabbitmq
+        version: 0.0.0
+    spec:
+      containers:
+      - name: rabbitmq
+        image: gcr.io/project-5253/rabbitmq:v00
+        ports:
+        - containerPort: 5672

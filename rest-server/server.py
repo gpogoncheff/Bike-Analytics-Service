@@ -18,6 +18,7 @@ app = Flask(__name__)
 
 def publish_work_request(data, host='rabbitmq', queue_name='work_route'):
     success = False
+    connection = None
     try:
         connection = pika.BlockingConnection(pika.ConnectionParameters(host=host))
         channel = connection.channel()
@@ -44,6 +45,7 @@ def publish_work_request(data, host='rabbitmq', queue_name='work_route'):
 
 def log_api_status(api, success, message='', host='rabbitmq'):
     # log the api that was called and the result of the api call
+    connection = None
     try:
         connection = pika.BlockingConnection(pika.ConnectionParameters(host=host))
         log_channel = connection.channel()

@@ -14,7 +14,8 @@ from utils.CloudStorage import get_visualization_url
 
 # Initialize the Flask application
 app = Flask(__name__)
-mq_host = 'localhost'
+
+mq_host = 'rabbitmq'
 
 
 def publish_work_request(data, queue_name='work_route'):
@@ -73,7 +74,7 @@ def log_api_status(api, success, message=''):
 # Test route
 @app.route('/', methods=['GET', 'POST'])
 def test():
-    return "Testing..."
+    return "Welcome to my Cloud Service!"
 
 
 @app.route('/upload-ride/<filename>', methods=['PUT'])

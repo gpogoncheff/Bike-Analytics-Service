@@ -9,7 +9,7 @@ from utils.DataAnalyzer import DataAnalyzer
 import utils.Datastore as datastore
 from utils.CloudStorage import upload_visualization, upload_file
 
-mq_host = 'localhost'
+mq_host = 'rabbitmq'
 
 def log_work(work_description, success):
     # log the api that was called and the result of the api call

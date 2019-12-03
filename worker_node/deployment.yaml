@@ -21,7 +21,7 @@ spec:
         secret:
           secretName: proj-access-key
       containers:
-      - image: gcr.io/project-5253/worker-server:v03
+      - image: gcr.io/project-5253/worker-server:v20
         name: worker-server
         volumeMounts:
         - name: google-cloud-key

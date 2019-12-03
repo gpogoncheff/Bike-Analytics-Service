@@ -22,7 +22,7 @@ spec:
           secretName: proj-access-key
       containers:
       - name: rest-server
-        image: gcr.io/project-5253/rest-server:v03
+        image: gcr.io/project-5253/rest-server:v10
         ports:
         - containerPort: 5000
         volumeMounts:

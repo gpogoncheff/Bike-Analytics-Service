@@ -55,25 +55,32 @@ def get_summary_statistics(analyzer, data):
 
 
 def callback(ch, method, properties, body):
-    digest, filename, file_data = pickle.loads(body)
-    dataparser = GPXDataParser(file_data.decode('utf-8'))
-    segments_data = dataparser.get_ride_data()
-    analyzer = DataAnalyzer()
+    is_valid_data = False
 
-    for i, data in enumerate(segments_data):
-        duration, distance, climb, descend = get_summary_statistics(analyzer, data)
-        url = get_visualization(analyzer, data, digest, i)
-        print('Ride data visualization available at: {}'.format(url))
+    try:
+        digest, filename, file_data = pickle.loads(body)
+        dataparser = GPXDataParser(file_data.decode('utf-8'))
+        segments_data = dataparser.get_ride_data()
+        analyzer = DataAnalyzer()
+        is_valid_data = True
+    except:
+        print('Uploaded data file does not contain valid data')
 
-        try:
-            datastore.add_ride(digest, i, duration, distance, climb, descend)
-            log_work('Added data from {} to Datastore DB'.format(digest), success=True)
-        except BaseException as e:
-            print('Failed to update Database - {}'.format(e))
-            log_work('Failed to add data from {} to Datastore DB'.format(digest), success=False)
+    if is_valid_data:
+        for i, data in enumerate(segments_data):
+            duration, distance, climb, descend = get_summary_statistics(analyzer, data)
+            url = get_visualization(analyzer, data, digest, i)
+            print('Ride data visualization available at: {}'.format(url))
 
-    upload_file(digest, file_data.decode('utf-8'))
-    log_work('Uploaded data file with digest {} to Cloud Storage'.format(digest), success=True)
+            try:
+                datastore.add_ride(digest, i, duration, distance, climb, descend)
+                log_work('Added data from {} to Datastore DB'.format(digest), success=True)
+            except BaseException as e:
+                print('Failed to update Database - {}'.format(e))
+                log_work('Failed to add data from {} to Datastore DB'.format(digest), success=False)
+
+        upload_file(digest, file_data.decode('utf-8'))
+        log_work('Uploaded data file with digest {} to Cloud Storage'.format(digest), success=True)
 
     ch.basic_ack(delivery_tag=method.delivery_tag)
 

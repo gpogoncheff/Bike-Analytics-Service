@@ -1,4 +1,4 @@
 #!/bin/sh
-# container: gcr.io/lab8-257721/rest-server:v30
+# image: gcr.io/project-5253/rest-server:v10
 kubectl create -f deployment.yaml
 kubectl create -f service.yaml
